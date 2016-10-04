@@ -43,6 +43,7 @@ def merge(images, size, gray=False):
 
 def imsave(images, size, path, gray=False):
     return scipy.misc.imsave(path, merge(images, size, gray=gray))
+    #return scipy.misc.imsave(path, images)
 
 
 def center_crop(x, crop_h, crop_w=None, resize_w=64):

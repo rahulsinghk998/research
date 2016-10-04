@@ -87,17 +87,17 @@ def train_model(name, g_train, d_train, sampler, generator, samples_per_epoch, n
         counter += 1
 
         # save samples
-        if batch_index % 100 == 0:
-          join_image = np.zeros_like(np.concatenate([samples[:64], xs[:64]], axis=0))
-          for j, (i1, i2) in enumerate(zip(samples[:64], xs[:64])):
+        if batch_index % 100 == -1:
+          join_image = np.zeros_like(np.concatenate([samples[:32], xs[:32]], axis=0))
+          for j, (i1, i2) in enumerate(zip(samples[:32], xs[:32])):
             join_image[j*2] = i1
             join_image[j*2+1] = i2
           save_images(join_image, [8*2, 8],
                       './outputs/samples_%s/train_%s_%s.png' % (name, epoch, batch_index))
 
           samples, xs = sampler(z, x)
-          join_image = np.zeros_like(np.concatenate([samples[:64], xs[:64]], axis=0))
-          for j, (i1, i2) in enumerate(zip(samples[:64], xs[:64])):
+          join_image = np.zeros_like(np.concatenate([samples[:32], xs[:32]], axis=0))
+          for j, (i1, i2) in enumerate(zip(samples[:32], xs[:32])):
             join_image[j*2] = i1
             join_image[j*2+1] = i2
           save_images(join_image, [8*2, 8],
@@ -130,7 +130,7 @@ if __name__ == "__main__":
   parser.add_argument('--host', type=str, default="localhost", help='Data server ip address.')
   parser.add_argument('--port', type=int, default=5557, help='Port of server.')
   # parser.add_argument('--time', type=int, default=1, help='How many temporal frames in a single input.')
-  parser.add_argument('--batch', type=int, default=64, help='Batch size.')
+  parser.add_argument('--batch', type=int, default=32, help='Batch size.')
   parser.add_argument('--epoch', type=int, default=200, help='Number of epochs.')
   parser.add_argument('--gpu', type=int, default=0, help='Which gpu to use')
   parser.add_argument('--epochsize', type=int, default=10000, help='How many frames per epoch.')
@@ -155,7 +155,12 @@ if __name__ == "__main__":
   if not os.path.exists("./outputs/samples_"+args.name):
       os.makedirs("./outputs/samples_"+args.name)
 
-  with tf.Session() as sess:
+  #Added for fractional memory allocation of gpu : # Assume that 12GB of GPU memory and we want to allocate ~4GB
+  gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
+  with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
+  #with tf.Session() as sess:
+    #sess.run(tf.initialize_variables())
+    #g_train, d_train, sampler, saver, loader, extras = get_model(sess=sess, name=args.name, batch_size=args.batch, gpu=args.gpu)
     g_train, d_train, sampler, saver, loader, extras = get_model(sess=sess, name=args.name, batch_size=args.batch, gpu=args.gpu)
 
     # start from checkpoint

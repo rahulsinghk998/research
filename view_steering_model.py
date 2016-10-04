@@ -87,7 +87,7 @@ def draw_path_on(img, speed_ms, angle_steers, color=(0,0,255)):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Path viewer')
   parser.add_argument('model', type=str, help='Path to model definition json. Model weights should be on the same path.')
-  parser.add_argument('--dataset', type=str, default="2016-06-08--11-46-01", help='Dataset/video clip name')
+  parser.add_argument('--dataset', type=str, default="2016-06-02--21-39-29", help='Dataset/video clip name')
   args = parser.parse_args()
 
   with open(args.model, 'r') as jfile:
@@ -104,12 +104,12 @@ if __name__ == "__main__":
   log = h5py.File("dataset/log/"+dataset+".h5", "r")
   cam = h5py.File("dataset/camera/"+dataset+".h5", "r")
 
-  print log.keys()
+  print (log.keys())
 
   # skip to highway
   for i in range(skip*100, log['times'].shape[0]):
     if i%100 == 0:
-      print "%.2f seconds elapsed" % (i/100.0)
+      print ("%.2f seconds elapsed" % (i/100.0))
     img = cam['X'][log['cam1_ptr'][i]].swapaxes(0,2).swapaxes(0,1)
 
     predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]

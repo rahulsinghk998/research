@@ -65,7 +65,7 @@ def get_model(sess, image_shape=(80, 160, 3), gf_dim=64, df_dim=64, batch_size=6
       T = transition(batch_size)
       T.compile("sgd", "mse")
       t_vars = T.trainable_weights
-      print "T.shape: ", T.output_shape
+      print ("T.shape: ", T.output_shape)
 
       Img = Input(batch_shape=(batch_size, time+out_leng,) + image_shape)
       I = K.reshape(Img, (batch_size*(time+out_leng),)+image_shape)
@@ -78,9 +78,9 @@ def get_model(sess, image_shape=(80, 160, 3), gf_dim=64, df_dim=64, batch_size=6
 
       # costs
       loss = tf.reduce_mean(tf.square(target - out))
-      print "Transition variables:"
+      print ("Transition variables:")
       for v in t_vars:
-        print v.name
+        print (v.name)
 
       t_optim = tf.train.AdamOptimizer(learning_rate, beta1=beta1).minimize(loss, var_list=t_vars)
 
@@ -123,9 +123,9 @@ def get_model(sess, image_shape=(80, 160, 3), gf_dim=64, df_dim=64, batch_size=6
 
     def sampler(z, x):
       video = np.zeros((128, 80, 160, 3))
-      print "Sampling..."
+      print ("Sampling...")
       for i in range(128):
-        print i
+        print (i)
         x = x.reshape((-1, 80, 160, 3))
         # code = E.predict(x, batch_size=batch_size*(time+1))[0]
         code = sess.run([E(I)[0]], feed_dict={I: x, K.learning_phase(): 1})[0]

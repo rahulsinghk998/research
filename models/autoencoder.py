@@ -10,6 +10,10 @@ Unsupervised Representation Learning with Deep Convolutional Generative Adversar
 Alec Radford, Luke Metz, Soumith Chintala
 https://arxiv.org/abs/1511.06434
 """
+#Replacing all 64 by 32-> batchsize
+#Gpu setting - activating
+#GPU memory usage restiction
+
 import os
 os.environ["KERAS_BACKEND"] = "tensorflow"
 import numpy as np
@@ -33,7 +37,7 @@ def mean_normal(shape, mean=1., scale=0.02, name=None):
 
 
 def cleanup(data):
-  X = data[0][:64, -1]
+  X = data[0][:32, -1]
   X = np.asarray([cv2.resize(x.transpose(1, 2, 0), (160, 80)) for x in X])
   X = X/127.5 - 1.
   Z = np.random.normal(0, 1, (X.shape[0], z_dim))
@@ -45,7 +49,10 @@ def generator(batch_size, gf_dim, ch, rows, cols):
     model = Sequential()
 
     model.add(Dense(gf_dim*8*rows[0]*cols[0], batch_input_shape=(batch_size, z_dim), name="g_h0_lin", init=normal))
-    model.add(Reshape((rows[0], cols[0], gf_dim*8)))
+    #### FLOATING value of 'rows' and 'cols' causing error
+    #print(int(rows[0]),int(cols[0]),gf_dim*8)
+    model.add(Reshape((int(rows[0]),int(cols[0]), gf_dim*8)))
+
     model.add(BN(mode=2, axis=3, name="g_bn0", gamma_init=mean_normal, epsilon=1e-5))
     model.add(Activation("relu"))
 
@@ -127,11 +134,15 @@ def discriminator(batch_size, df_dim, ch, rows, cols):
     return output
 
 
-def get_model(sess, image_shape=(80, 160, 3), gf_dim=64, df_dim=64, batch_size=64,
+def get_model(sess, image_shape=(80, 160, 3), gf_dim=32, df_dim=32, batch_size=32,
               name="autoencoder", gpu=0):
     K.set_session(sess)
     checkpoint_dir = './outputs/results_' + name
+
+    #GPU Implementation which was causing error
     with tf.variable_scope(name), tf.device("/gpu:{}".format(gpu)):
+    #with tf.variable_scope(name):
+    #with tf.variable_scope(name), tf.device("/cpu:{}".format(gpu)):
       # sizes
       ch = image_shape[2]
       rows = [image_shape[0]/i for i in [16, 8, 4, 2, 1]]
@@ -141,17 +152,17 @@ def get_model(sess, image_shape=(80, 160, 3), gf_dim=64, df_dim=64, batch_size=6
       G = generator(batch_size, gf_dim, ch, rows, cols)
       G.compile("sgd", "mse")
       g_vars = G.trainable_weights
-      print "G.shape: ", G.output_shape
+      print ("G.shape: ", G.output_shape)
 
       E = encoder(batch_size, df_dim, ch, rows, cols)
       E.compile("sgd", "mse")
       e_vars = E.trainable_weights
-      print "E.shape: ", E.output_shape
+      print ("E.shape: ", E.output_shape)
 
       D = discriminator(batch_size, df_dim, ch, rows, cols)
       D.compile("sgd", "mse")
       d_vars = D.trainable_weights
-      print "D.shape: ", D.output_shape
+      print ("D.shape: ", D.output_shape)
 
       Z2 = Input(batch_shape=(batch_size, z_dim), name='more_noise')
       Z = G.input
@@ -180,15 +191,15 @@ def get_model(sess, image_shape=(80, 160, 3), gf_dim=64, df_dim=64, batch_size=6
       e_loss = kl_loss + like_loss
 
       # optimizers
-      print "Generator variables:"
+      print ("Generator variables:")
       for v in g_vars:
-        print v.name
-      print "Discriminator variables:"
+        print (v.name)
+      print ("Discriminator variables:")
       for v in d_vars:
-        print v.name
-      print "Encoder variables:"
+        print (v.name)
+      print ("Encoder variables:")
       for v in e_vars:
-        print v.name
+        print (v.name)
 
       e_optim = tf.train.AdamOptimizer(learning_rate, beta1=beta1).minimize(e_loss, var_list=e_vars)
       d_optim = tf.train.AdamOptimizer(learning_rate, beta1=beta1).minimize(d_loss, var_list=d_vars)
