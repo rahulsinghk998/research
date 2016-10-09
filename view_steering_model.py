@@ -9,7 +9,7 @@ from keras.models import model_from_json
 
 pygame.init()
 size = (320*2, 160*2)
-pygame.display.set_caption("comma.ai data viewer")
+pygame.display.set_caption("Viewer")
 screen = pygame.display.set_mode(size, pygame.DOUBLEBUF)
 
 camera_surface = pygame.surface.Surface((320,160),0,24).convert()
@@ -125,3 +125,4 @@ if __name__ == "__main__":
     camera_surface_2x = pygame.transform.scale2x(camera_surface)
     screen.blit(camera_surface_2x, (0,0))
     pygame.display.flip()
+    

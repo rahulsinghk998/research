@@ -57,6 +57,20 @@ def concatenate(camera_names, time_len):
   print ("training on %d/%d examples" % (filters.shape[0], angle.shape[0]))
   return c5x, angle, speed, filters, hdf5_camera
 
+"""
+   c5x::      [(0, 44792, <HDF5 dataset "X": shape (44792, 3, 160, 320), type "|u1">), 
+               (44792, 62969, <HDF5 dataset "X": shape (18177, 3, 160, 320), type "|u1">)
+              ] 
+   angle::    [ 48.  48.  48. ...,  24.  24.  24.]
+   speed::    [ 0.  0.  0. ...,  0.  0.  0.] 
+   filter::   [    2     3     4 ..., 62967 62968 62969]
+   hdf5_cam:: [<HDF5 file "2016-06-02--21-39-29.h5" (mode r)>, 
+               <HDF5 file "2016-06-08--11-46-01.h5" (mode r)>
+
+   Memory calculation per batch: 256*3*160*320 = 39,321,600   => approx (39Mb)
+
+"""
+
 
 first = True
 
@@ -72,10 +86,8 @@ def datagen(filter_files, time_len=1, batch_size=256, ignore_goods=False):
   filter_names = sorted(filter_files)
 
   logger.info("Loading {} hdf5 buckets.".format(len(filter_names)))
-
   c5x, angle, speed, filters, hdf5_camera = concatenate(filter_names, time_len=time_len)
   filters_set = set(filters)
-
   logger.info("camera files {}".format(len(c5x)))
 
   X_batch = np.zeros((batch_size, time_len, 3, 160, 320), dtype='uint8')
@@ -133,3 +145,4 @@ def datagen(filter_files, time_len=1, batch_size=256, ignore_goods=False):
     except:
       traceback.print_exc()
       pass
+
