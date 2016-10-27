@@ -22,7 +22,7 @@ def send_arrays(socket, arrays, stop=False):
   """Send NumPy arrays using the buffer interface and some metadata.
 
   Parameters
-  ----------
+  ---------------------------------------------------------------------
   socket : :class:`zmq.Socket`
   The socket to send data over.
   arrays : list
@@ -33,7 +33,7 @@ def send_arrays(socket, arrays, stop=False):
   ``StopIteration`` when it receives this.
 
   Notes
-  -----
+  ---------------------------------------------------------------------
   The protocol is very simple: A single JSON object describing the array
   format (using the same specification as ``.npy`` files) is sent first.
   Subsequently the arrays are sent as bytestreams (through NumPy's
@@ -94,9 +94,8 @@ def client_generator(port=5557, host="localhost", hwm=20):
   """Generator in client side should extend this generator
 
   Parameters
-  ----------
-
-  port : int
+  -----------------------------------------------------------------------
+  port: int
   hwm : int, optional
   The `ZeroMQ high-water mark (HWM)
   <http://zguide.zeromq.org/page:all#High-Water-Marks>`_ on the

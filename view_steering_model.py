@@ -100,26 +100,29 @@ if __name__ == "__main__":
   # default dataset is the validation data on the highway
   dataset = args.dataset
   skip = 300
-
   log = h5py.File("dataset/log/"+dataset+".h5", "r")
   cam = h5py.File("dataset/camera/"+dataset+".h5", "r")
-
   print (log.keys())
 
   # skip to highway
   for i in range(skip*100, log['times'].shape[0]):
     if i%100 == 0:
       print ("%.2f seconds elapsed" % (i/100.0))
+
+    '''This is for Just CNN model. However the image is used for viewer'''
     img = cam['X'][log['cam1_ptr'][i]].swapaxes(0,2).swapaxes(0,1)
 
-    predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]
+    '''This is for CNN-LSTM Model.'''
+    img_2 = np.array((cam['X'][log['cam1_ptr'][i]], cam['X'][log['cam1_ptr'][i+7]]))
+    speed_ms = np.array((log['speed'][i],log['speed'][i+7]))
+    predicted_steers = model.predict([img_2[None, :, :, :, :], speed_ms[None, :, None]])[0][0][0]
+
+    #predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]
 
     angle_steers = log['steering_angle'][i]
     speed_ms = log['speed'][i]
-
     draw_path_on(img, speed_ms, -angle_steers/10.0)
     draw_path_on(img, speed_ms, -predicted_steers/10.0, (0, 255, 0))
-
     # draw on
     pygame.surfarray.blit_array(camera_surface, img.swapaxes(0,1))
     camera_surface_2x = pygame.transform.scale2x(camera_surface)
