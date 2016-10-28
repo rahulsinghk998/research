@@ -32,64 +32,66 @@ def gen(hwm, host, port):
       Brake = Brake[:,-1]
       yield Image, Steer
     else:
-      yield [Image,Speed], Steer
+      yield [Image,Speed], Steer  #Need to change according to the modelling parameter
 
 
 def get_model(time_len=1):
-  time, ch, row, col = time_len, 3, 160, 320  # camera format
+  if time_len>1:
+    time, ch, row, col = time_len, 3, 160, 320  # camera format
 
-  model = Sequential()
-  model.add(Lambda(lambda x: x/127.5 - 1., input_shape=(time, ch, row, col), output_shape=(time, ch, row, col)))
+    model = Sequential()
+    model.add(Lambda(lambda x: x/127.5 - 1., input_shape=(time, ch, row, col), output_shape=(time, ch, row, col)))
 
-  model.add(TimeDistributed(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same")))
-  model.add(ELU())
-  model.add(TimeDistributed(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same")))
-  model.add(ELU())
-  model.add(TimeDistributed(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same")))
-  model.add(TimeDistributed(Flatten()))
-  model.add(TimeDistributed(Dense(256)))
+    model.add(TimeDistributed(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same")))
+    model.add(ELU())
+    model.add(TimeDistributed(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same")))
+    model.add(ELU())
+    model.add(TimeDistributed(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same")))
+    model.add(TimeDistributed(Flatten()))
+    model.add(TimeDistributed(Dense(256)))
 
-  model1=Sequential()
-  model1.add(Lambda(lambda x:x, input_shape=(time_len,1), output_shape=(time_len,1)))
-  merge=Sequential()
-  merge.add(Merge([model, model1], mode='concat', concat_axis=2))
-  #merge.add(Merge([model, tensor], mode='concat', concat_axis=2))
-  merge.add(LSTM(output_dim=1, unroll=True, return_sequences=True))
+    model1=Sequential()
+    model1.add(Lambda(lambda x:x, input_shape=(time_len,1), output_shape=(time_len,1)))
+    merge=Sequential()
+    merge.add(Merge([model, model1], mode='concat', concat_axis=2))
+    #merge.add(Merge([model, tensor], mode='concat', concat_axis=2))
+    merge.add(LSTM(output_dim=1, unroll=True, return_sequences=True))
 
-  #,activation='relu')))
-  #model.add(TimeDistributed(Dense(128,activation='relu')))
-  #model.add(LSTM(output_dim=1,unroll=True, return_sequences=True))
-  model.compile(optimizer="adam", loss="mse")
-  model1.compile(optimizer="adam", loss="mse")
-  merge.compile(optimizer="adam", loss="mse")
+    #,activation='relu')))
+    #model.add(TimeDistributed(Dense(128,activation='relu')))
+    #model.add(LSTM(output_dim=1,unroll=True, return_sequences=True))
+    model.compile(optimizer="adam", loss="mse")
+    model1.compile(optimizer="adam", loss="mse")
+    merge.compile(optimizer="adam", loss="mse")
 
-  return merge
+    return merge
 
-  """
+  else:
+    ch, row, col = 3, 160, 320  # camera format
+
+    model = Sequential()
+    model.add(Lambda(lambda x: x/127.5 - 1.,
+              input_shape=(ch, row, col),
+              output_shape=(ch, row, col)))
+    model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
+    model.add(ELU())
+    model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(ELU())
+    model.add(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(Flatten())
+    model.add(Dropout(.2))
+    model.add(ELU())
+    model.add(Dense(512))
+    model.add(Dropout(.5))
+    model.add(ELU())
+    model.add(Dense(1))
+
+    model.compile(optimizer="adam", loss="mse")
+
+    return model
   #tensor = Input((time_len,1))
-  ch, row, col = 3, 160, 320  # camera format
 
-  model = Sequential()
-  model.add(Lambda(lambda x: x/127.5 - 1.,
-            input_shape=(ch, row, col),
-            output_shape=(ch, row, col)))
-  model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
-  model.add(ELU())
-  model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
-  model.add(ELU())
-  model.add(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same"))
-  model.add(Flatten())
-  model.add(Dropout(.2))
-  model.add(ELU())
-  model.add(Dense(512))
-  model.add(Dropout(.5))
-  model.add(ELU())
-  model.add(Dense(1))
 
-  model.compile(optimizer="adam", loss="mse")
-
-  return model
-  """
 
 
 if __name__ == "__main__":

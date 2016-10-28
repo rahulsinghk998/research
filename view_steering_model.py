@@ -91,6 +91,7 @@ if __name__ == "__main__":
   parser.add_argument('--dataset', type=str, default="2016-06-02--21-39-29", help='Dataset/video clip name')
   parser.add_argument('--start', type=int, default="300", help='Video testing start point (in sec)')
   parser.add_argument('--end', type=int, default="3000", help='Video testing end point (in sec)') #need to set a valid end point
+  parser.add_argument('--time', type=int, default="1", help='Time Sequence length')
   
   args = parser.parse_args()
   out_file=list()
@@ -117,12 +118,14 @@ if __name__ == "__main__":
     '''For CNN model. However the image is used for viewer'''
     img = cam['X'][log['cam1_ptr'][i]].swapaxes(0,2).swapaxes(0,1)
 
+    if args.time>1 :
     '''This is for CNN-LSTM Model.'''
-    #img_2 = np.array((cam['X'][log['cam1_ptr'][i]], cam['X'][log['cam1_ptr'][i+7]]))
-    #speed_ms = np.array((log['speed'][i],log['speed'][i+7]))
-    #predicted_steers = model.predict([img_2[None, :, :, :, :], speed_ms[None, :, None]])[0][0][0]
+      img_2 = np.array((cam['X'][log['cam1_ptr'][i]], cam['X'][log['cam1_ptr'][i+7]]))
+      speed_ms = np.array((log['speed'][i],log['speed'][i+7]))
+      predicted_steers = model.predict([img_2[None, :, :, :, :], speed_ms[None, :, None]])[0][0][0]
 
-    predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]
+    else :
+      predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]
 
     angle_steers = log['steering_angle'][i]
     speed_ms = log['speed'][i]

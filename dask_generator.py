@@ -16,15 +16,15 @@ logger = logging.getLogger(__name__)
 def concatenate(camera_names, time_len):
   logs_names = [x.replace('camera', 'log') for x in camera_names]
 
-  angle = []  # steering angle of the car
-  speed = []  # steering angle of the car
-  gas = []
-  gear_choice = []
-  brake = []
+  angle = []        # steering angle of the car
+  speed = []        # speed of the car
+  gas = []          # gas padel position of car
+  gear_choice = []  # gear choice of car
+  brake = []        # brake position of car
 
   hdf5_camera = []  # the camera hdf5 files need to continue open
-  c5x = []
-  filters = []
+  c5x = []          # stores the all set of input dataset
+  filters = []      # stores all the 'good' time stamps i.e. when Steering_angle<=Threshold_steering
   lastidx = 0
 
   for cword, tword in zip(camera_names, logs_names):
@@ -83,6 +83,8 @@ def concatenate(camera_names, time_len):
                <HDF5 file "2016-06-08--11-46-01.h5" (mode r)>
 
    Memory calculation per batch: 256*3*160*320 = 39,321,600   => approx (39Mb)
+
+   Total Parameters= ???
 
 """
 
