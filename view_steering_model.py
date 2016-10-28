@@ -5,6 +5,7 @@ import numpy as np
 import h5py
 import pygame
 import json
+import matplotlib.pyplot as plt
 from keras.models import model_from_json
 
 pygame.init()
@@ -50,9 +51,9 @@ def perspective_tform(x, y):
 # ***** functions to draw lines *****
 def draw_pt(img, x, y, color, sz=1):
   row, col = perspective_tform(x, y)
-  if row >= 0 and row < img.shape[0] and\
+  if row >= 0 and row < img.shape[0] and \
      col >= 0 and col < img.shape[1]:
-    img[row-sz:row+sz, col-sz:col+sz] = color
+    img[int(row-sz):int(row+sz), int(col-sz):int(col+sz)] = color
 
 def draw_path(img, path_x, path_y, color):
   for x, y in zip(path_x, path_y):
@@ -88,7 +89,11 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Path viewer')
   parser.add_argument('model', type=str, help='Path to model definition json. Model weights should be on the same path.')
   parser.add_argument('--dataset', type=str, default="2016-06-02--21-39-29", help='Dataset/video clip name')
+  parser.add_argument('--start', type=int, default="300", help='Video testing start point (in sec)')
+  parser.add_argument('--end', type=int, default="3000", help='Video testing end point (in sec)') #need to set a valid end point
+  
   args = parser.parse_args()
+  out_file=list()
 
   with open(args.model, 'r') as jfile:
     model = model_from_json(json.load(jfile))
@@ -99,28 +104,30 @@ if __name__ == "__main__":
 
   # default dataset is the validation data on the highway
   dataset = args.dataset
-  skip = 300
-  log = h5py.File("dataset/log/"+dataset+".h5", "r")
+  skip = args.start
+  log = h5py.File("dataset/log/"+dataset+".h5", "r") #log = h5py.File("dataset/log/2016-06-02--21-39-29.h5", "r")
   cam = h5py.File("dataset/camera/"+dataset+".h5", "r")
   print (log.keys())
 
   # skip to highway
-  for i in range(skip*100, log['times'].shape[0]):
+  for i in range(skip*100, min(log['times'].shape[0], args.end*100)):
     if i%100 == 0:
       print ("%.2f seconds elapsed" % (i/100.0))
 
-    '''This is for Just CNN model. However the image is used for viewer'''
+    '''For CNN model. However the image is used for viewer'''
     img = cam['X'][log['cam1_ptr'][i]].swapaxes(0,2).swapaxes(0,1)
 
     '''This is for CNN-LSTM Model.'''
-    img_2 = np.array((cam['X'][log['cam1_ptr'][i]], cam['X'][log['cam1_ptr'][i+7]]))
-    speed_ms = np.array((log['speed'][i],log['speed'][i+7]))
-    predicted_steers = model.predict([img_2[None, :, :, :, :], speed_ms[None, :, None]])[0][0][0]
+    #img_2 = np.array((cam['X'][log['cam1_ptr'][i]], cam['X'][log['cam1_ptr'][i+7]]))
+    #speed_ms = np.array((log['speed'][i],log['speed'][i+7]))
+    #predicted_steers = model.predict([img_2[None, :, :, :, :], speed_ms[None, :, None]])[0][0][0]
 
-    #predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]
+    predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]
 
     angle_steers = log['steering_angle'][i]
     speed_ms = log['speed'][i]
+    out_file.append([i, predicted_steers, angle_steers, speed_ms])
+
     draw_path_on(img, speed_ms, -angle_steers/10.0)
     draw_path_on(img, speed_ms, -predicted_steers/10.0, (0, 255, 0))
     # draw on
@@ -128,4 +135,30 @@ if __name__ == "__main__":
     camera_surface_2x = pygame.transform.scale2x(camera_surface)
     screen.blit(camera_surface_2x, (0,0))
     pygame.display.flip()
-    
+
+  x=np.array(out_file)
+  np.savetxt("./outputs/steering_model/out"+args.dataset+"---"+ str(args.start)+ "-"+ str(args.end)+".txt",x, fmt="%4.3f")
+
+  #View both actual vs real
+  x=x.transpose()
+  plt.plot(x[0],x[1], '-g')
+  plt.plot(x[0],x[2], '-b')
+  plt.xlabel('Time (in ms)')
+  plt.title("Plot of Actual and Predicted Steering -- dataset -- " + args.dataset)
+  plt.ylabel('Angle Value (in degrees)')
+  plt.savefig("./outputs/steering_model/act_vs_predict"+args.dataset+"---start-"+ str(args.start)+ "-end-"+ str(args.end)+".png",format='eps', dpi=1000)
+  plt.show()
+
+  #View Error
+  plt.plot(x[0], x[1]-x[2], '-r')
+  plt.title("Plot of Error between Actual-Predicted -- dataset -- " + args.dataset)
+  plt.xlabel('Time (in ms)')
+  plt.ylabel('Error (in degrees)')
+  plt.savefig("./outputs/steering_model/error_plot"+args.dataset+"---start-"+ str(args.start)+ "-end-"+ str(args.end)+".png",format='eps', dpi=1000)
+  plt.show()
+'''
+plt.scatter(dates,values)
+plt.plot(dates, values)
+plt.show()
+'''
+  
