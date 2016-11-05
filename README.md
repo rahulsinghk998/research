@@ -80,13 +80,3 @@ between camera frames and the other measurements.
 [tensorflow-0.9](https://github.com/tensorflow/tensorflow)  
 [keras-1.0.6](https://github.com/fchollet/keras)  
 [cv2](https://anaconda.org/menpo/opencv3)
-
-## Hiring
-
-Want a job at [comma.ai](http://comma.ai)?
-
-Show us amazing stuff on this dataset
-
-## Credits
-
-Riccardo Biasini, George Hotz, Sam Khalandovsky, Eder Santana, and Niel van der Westhuizen
