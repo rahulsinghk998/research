@@ -1,12 +1,15 @@
-# the people's comma
+# Driving State Prediction using LRCN
+This project is an extention of the work done by Comma.ai. We are implementing a LRCN (LSTM + CNN) model for the driver state prediction. 
 
-## the paper
+## Comma.ai's paper
 
 [Learning a Driving Simulator](http://arxiv.org/abs/1608.01230)
 
-## the comma.ai driving dataset
+## Comma.ai and Udacity online released driving dataset
 
 7 and a quarter hours of largely highway driving. Enough to train what we had in [Bloomberg](http://www.bloomberg.com/features/2015-george-hotz-self-driving-car/).
+
+Udacity has released 223 Gb of driving dataset which consist of 2 set of datasets.
 
 ## Examples
 
@@ -77,13 +80,3 @@ between camera frames and the other measurements.
 [tensorflow-0.9](https://github.com/tensorflow/tensorflow)  
 [keras-1.0.6](https://github.com/fchollet/keras)  
 [cv2](https://anaconda.org/menpo/opencv3)
-
-## Hiring
-
-Want a job at [comma.ai](http://comma.ai)?
-
-Show us amazing stuff on this dataset
-
-## Credits
-
-Riccardo Biasini, George Hotz, Sam Khalandovsky, Eder Santana, and Niel van der Westhuizen
