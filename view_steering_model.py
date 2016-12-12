@@ -92,9 +92,10 @@ if __name__ == "__main__":
   parser.add_argument('--start', type=int, default="300", help='Video testing start point (in sec)')
   parser.add_argument('--end', type=int, default="3000", help='Video testing end point (in sec)') #need to set a valid end point
   parser.add_argument('--time', type=int, default="1", help='Time Sequence length')
-  
   args = parser.parse_args()
   out_file=list()
+  dataset = args.dataset
+  skip = args.start
 
   with open(args.model, 'r') as jfile:
     model = model_from_json(json.load(jfile))
@@ -102,10 +103,9 @@ if __name__ == "__main__":
   model.compile("sgd", "mse")
   weights_file = args.model.replace('json', 'keras')
   model.load_weights(weights_file)
+  print(model.summary())
 
   # default dataset is the validation data on the highway
-  dataset = args.dataset
-  skip = args.start
   log = h5py.File("dataset/log/"+dataset+".h5", "r") #log = h5py.File("dataset/log/2016-06-02--21-39-29.h5", "r")
   cam = h5py.File("dataset/camera/"+dataset+".h5", "r")
   print (log.keys())
@@ -117,9 +117,11 @@ if __name__ == "__main__":
 
     '''For CNN model. However the image is used for viewer'''
     img = cam['X'][log['cam1_ptr'][i]].swapaxes(0,2).swapaxes(0,1)
-
-    if args.time>1 :
     '''This is for CNN-LSTM Model.'''
+    if args.time>1 :
+      #img_2 = np.array((cam['X'][log['cam1_ptr'][i]]))
+      #speed_ms = np.array([log['speed'][i]])
+      #predicted_steers = model.predict([img_2[None, :, :, :], speed_ms[None, :, None]])[0][0][0]
       img_2 = np.array((cam['X'][log['cam1_ptr'][i]], cam['X'][log['cam1_ptr'][i+7]]))
       speed_ms = np.array((log['speed'][i],log['speed'][i+7]))
       predicted_steers = model.predict([img_2[None, :, :, :, :], speed_ms[None, :, None]])[0][0][0]
@@ -127,6 +129,7 @@ if __name__ == "__main__":
     else :
       predicted_steers = model.predict(img[None, :, :, :].transpose(0, 3, 1, 2))[0][0]
 
+    print(predicted_steers)
     angle_steers = log['steering_angle'][i]
     speed_ms = log['speed'][i]
     out_file.append([i, predicted_steers, angle_steers, speed_ms])

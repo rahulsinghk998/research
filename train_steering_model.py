@@ -1,22 +1,92 @@
 #!/usr/bin/env python
 """
 Steering angle prediction model
+
+http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/
+##Model checkpoints in keras:: https://keras.io/callbacks/#modelcheckpoint
+#Checkpoints:: http://machinelearningmastery.com/check-point-deep-learning-models-keras/
+# checkpoint
+filepath="weights.best.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+callbacks_list = [checkpoint]
+# checkpoint
+filepath="weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+callbacks_list = [checkpoint]
+----------------------------------------------------------------------------------------------------------
+#Keras Callback:: https://keras.io/callbacks/
+#http://stackoverflow.com/questions/36895627/python-keras-creating-a-callback-with-one-prediction-for-each-epoch?noredirect=1&lq=1
+class prediction_history(Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        self.predhis=(model.predict(predictor_train))
+
+#Calling the subclass
+predictions=prediction_history()
+
+#Executing the model.fit of the neural network
+model.fit(X=predictor_train, y=target_train, nb_epoch=2, batch_size=batch,validation_split=0.1,callbacks=[predictions]) 
+
+#Printing the prediction history
+print predictions.predhis
+----------------------------------------------------------------------------------------------------------
+Visualizing the intermediate layers
+https://github.com/fchollet/keras/issues/41
+https://github.com/fchollet/keras/issues/2890
+1. import theano
+get_activations = theano.function([model.layers[0].input], model.layers[1].output(train=False), allow_input_downcast=True)
+activations = get_activations(X_batch) # same result as above
+----------------------------------------------------------------------------------------------------------
+issue with visualization
+1. https://github.com/fchollet/keras/issues/3216
+----------------------------------------------------------------------------------------------------------
+Check model.pop() working
+----------------------------------------------------------------------------------------------------------
+#put trained cnn model weights to train the rnn model#Intermediate layer visualization
+#https://keras.io/visualization/
 """
 import os
 import argparse
 import json
 import keras
-import numpy
+import h5py
+import numpy as np
+import keras.callbacks as cb
+import matplotlib.pyplot as plt
 from keras.layers import LSTM
 from keras.models import Sequential
 from keras.engine.topology import Merge
+from keras.models import model_from_json
 from keras.layers.convolutional import Convolution2D
 from keras.layers import Dense, Dropout, Flatten, Lambda, ELU
 from keras.layers import TimeDistributed, Activation, MaxPooling2D
-
-import matplotlib.pyplot as plot
-
 from server import client_generator
+from keras.layers.core import RepeatVector
+import predict_model
+
+#layer_indices=[0,1,2,6,7]
+#https://groups.google.com/forum/#!topic/keras-users/UzKGcXtUucU
+def load_custom_weights(model, filepath, layer_indices):
+  f = h5py.File(filepath, mode='r')
+  #g = f['graph']
+  #weights = [g['param_{}'.format(p)] for p in layer_indices]
+  model.set_weights(weights)
+  f.close()
+
+
+
+def pop_layer(model):
+  if not model.outputs:
+    raise Exception('Sequential model cannot be popped: model is empty.')
+  model.layers.pop()
+  if not model.layers:
+    model.outputs = []
+    model.inbound_nodes = []
+    model.outbound_nodes = []
+  else:
+    model.layers[-1].outbound_nodes = []
+    model.outputs = [model.layers[-1].output]
+  model.built = False
+
 
 
 def gen(hwm, host, port):
@@ -25,72 +95,38 @@ def gen(hwm, host, port):
 
     if Image.shape[1] == 1:  # no temporal context
       Image = Image[:, -1]
-      Steer = Steer[:, -1]
-      Speed = Speed[:,-1]
+      #Steer = Steer[:, -1]
+      #Speed = Speed[:,-1]
       Gas   = Gas[:, -1]
       Gear  = Gear[:, -1]
       Brake = Brake[:,-1]
-      yield Image, Steer
+      yield [Image,Speed], Steer
     else:
       yield [Image,Speed], Steer  #Need to change according to the modelling parameter
 
 
-def get_model(time_len=1):
-  if time_len>1:
-    time, ch, row, col = time_len, 3, 160, 320  # camera format
 
-    model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1., input_shape=(time, ch, row, col), output_shape=(time, ch, row, col)))
+class LossHistory(cb.Callback):
+  def on_train_begin(self, logs={}):
+      self.losses = []
 
-    model.add(TimeDistributed(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same")))
-    model.add(ELU())
-    model.add(TimeDistributed(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same")))
-    model.add(ELU())
-    model.add(TimeDistributed(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same")))
-    model.add(TimeDistributed(Flatten()))
-    model.add(TimeDistributed(Dense(256)))
+  def on_batch_end(self, batch, logs={}):
+      batch_loss = logs.get('loss')
+      self.losses.append(batch_loss)
 
-    model1=Sequential()
-    model1.add(Lambda(lambda x:x, input_shape=(time_len,1), output_shape=(time_len,1)))
-    merge=Sequential()
-    merge.add(Merge([model, model1], mode='concat', concat_axis=2))
-    #merge.add(Merge([model, tensor], mode='concat', concat_axis=2))
-    merge.add(LSTM(output_dim=1, unroll=True, return_sequences=True))
 
-    #,activation='relu')))
-    #model.add(TimeDistributed(Dense(128,activation='relu')))
-    #model.add(LSTM(output_dim=1,unroll=True, return_sequences=True))
-    model.compile(optimizer="adam", loss="mse")
-    model1.compile(optimizer="adam", loss="mse")
-    merge.compile(optimizer="adam", loss="mse")
 
-    return merge
+def plot_losses(losses):
+  x=np.array(losses)
+  np.savetxt("./outputs/steering_model/loss_plot.txt",losses, fmt="%5.2f")
 
-  else:
-    ch, row, col = 3, 160, 320  # camera format
-
-    model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.,
-              input_shape=(ch, row, col),
-              output_shape=(ch, row, col)))
-    model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
-    model.add(ELU())
-    model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
-    model.add(ELU())
-    model.add(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same"))
-    model.add(Flatten())
-    model.add(Dropout(.2))
-    model.add(ELU())
-    model.add(Dense(512))
-    model.add(Dropout(.5))
-    model.add(ELU())
-    model.add(Dense(1))
-
-    model.compile(optimizer="adam", loss="mse")
-
-    return model
-  #tensor = Input((time_len,1))
-
+  fig = plt.figure()
+  ax = fig.add_subplot(111)
+  ax.plot(losses)
+  ax.set_title('Loss per batch')
+  fig.savefig("./outputs/steering_model/loss_plot.png",format='eps', dpi=1000)
+  fig.show()
+  #fig.pause(0.005)
 
 
 
@@ -107,17 +143,23 @@ if __name__ == "__main__":
   parser.set_defaults(skipvalidate=False)
   parser.set_defaults(loadweights=False)
   args = parser.parse_args()
+  history = LossHistory()
 
-  model = get_model(args.time)
+  model = predict_model.get_model(args.time)
   model.fit_generator(
     gen(20, args.host, port=args.port),
     samples_per_epoch=10000,
     nb_epoch=args.epoch,
+    callbacks=[history], 
+    #show_accuracy=True,
     validation_data=gen(20, args.host, port=args.val_port),
-    nb_val_samples=1000
+    nb_val_samples=1000,
+    verbose=2
   )
-  print("Saving model weights and configuration file.")
 
+  plot_losses(history.losses)
+  #score = model.evaluate(X_test, y_test, batch_size=16, show_accuracy=True)
+  print("Saving model weights and configuration file.")
   if not os.path.exists("./outputs/steering_model"):
       os.makedirs("./outputs/steering_model")
 
