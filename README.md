@@ -5,21 +5,17 @@ In this project, we are currently extending on the prior art for predictive mode
 
 [Learning a Driving Simulator](http://arxiv.org/abs/1608.01230)
 
-## Comma.ai and Udacity online released driving dataset
+## Dataset:: Comma.ai and Udacity online released driving dataset
 
 7 and a quarter hours of largely highway driving. Enough to train what we had in [Bloomberg](http://www.bloomberg.com/features/2015-george-hotz-self-driving-car/).
 
 Udacity has released 223 Gb of driving dataset which consist of 2 set of datasets.
 
-## Examples
+## Our LRCN Model
 
-We present two Machine Learning Experiments to show
-possible ways to use this dataset:
+We present a Long-recurrent convolutional network model for predicting the driving states where both temporal as well as spacial information is preserved in the network. 
 
-
-<img src="./images/selfsteer.gif">
-
-[Training a steering angle predictor](SelfSteering.md)
+<img src="./images/lrcn.png">
 
 
 ## Requirements
