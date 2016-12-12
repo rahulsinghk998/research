@@ -17,6 +17,7 @@ We present a Long-recurrent convolutional network model for predicting the drivi
 
 <img src="./images/lrcn.png">
 
+[More Details are presented in the end-term report](./report/report.pdf)
 
 ## Requirements
 [anaconda](https://www.continuum.io/downloads)  
