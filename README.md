@@ -7,9 +7,9 @@ In this project, we are currently extending on the prior art for predictive mode
 
 ## Dataset:: Comma.ai and Udacity online released driving dataset
 
-7 and a quarter hours of largely highway driving. Enough to train what we had in [Bloomberg](http://www.bloomberg.com/features/2015-george-hotz-self-driving-car/).
+The dataset used in the project is taken from the the online release dataset from comma.ai. The dataset consists of 7.5 hours of driving on highways. It is divided into 11 sub-datasets where currently we are using 9 for training while other 2 for testing.
 
-Udacity has released 223 Gb of driving dataset which consist of 2 set of datasets.
+Apart from commai.ai dataset, we are also using the datasets provided by Udacity. The dataset provided by Udacity is also taken on 2016 Lincoln MKZ. It uses 2 velodyne VLP-16 LiDARs, 1 Delpi radar, 3 Point Grey Blackfly cameras, an Xsens IMU, an ECU for sensor data collection.
 
 ## Our LRCN Model
 
