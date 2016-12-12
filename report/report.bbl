@@ -1,0 +1,89 @@
+\begin{thebibliography}{xx}
+
+\harvarditem{A.~Diaz~Alvarez \harvardand\ Jimenez}{2014}{inteldrive1}
+A.~Diaz~Alvarez, F. Serradilla~Garcia, J. E. N. J. J.~A. \harvardand\ Jimenez,
+  F.  \harvardyearleft 2014\harvardyearright .
+\newblock Modeling the driving behavior of electric vehicles using smartphones
+  and neural networks, {\em IEEE Intelligent Transportation Systems Magazine}
+  {\bf 6}(3):~44--53.
+
+\harvarditem{A.~Geiger}{2012}{kitty}
+A.~Geiger, P.~Lenz, R.~U.  \harvardyearleft 2012\harvardyearright .
+\newblock Are we ready for autonomous driving? the kitti vision benchmark
+  suite, {\em Proc. IEEE Conf. Comp. Vis., Patt. Recog.} pp.~3354--3361.
+
+\harvarditem{Bojarski}{2016}{nvidia}
+Bojarski, Mariusz, e.~a.  \harvardyearleft 2016\harvardyearright .
+\newblock End to end learning for self-driving cars, {\em arXiv preprint
+  arXiv:1604.07316} .
+
+\harvarditem{D.~P.~Kingma}{2013}{autoen}
+D.~P.~Kingma, M.~W.  \harvardyearleft 2013\harvardyearright .
+\newblock Auto-encoding variational bayes, {\em arXiv preprint arXiv:
+  1312.6114} .
+
+\harvarditem{Donahue}{2015}{lrcn}
+Donahue, Jeffrey, e.~a.  \harvardyearleft 2015\harvardyearright .
+\newblock Long-term recurrent convolutional networks for visual recognition and
+  description, {\em Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition} pp.~2625--2634.
+
+\harvarditem{E.~Santana}{2016}{comma}
+E.~Santana, G.~H.  \harvardyearleft 2016\harvardyearright .
+\newblock Learning a driving simulator, {\em arXiv preprint arXiv:1608.01230} .
+
+\harvarditem{F.~A.~Gers}{2000}{lstm}
+F.~A.~Gers, J.~Schmidhuber, F.~C.  \harvardyearleft 2000\harvardyearright .
+\newblock Learning to forget: Continual prediction with lstm, {\em Neur. Comp.}
+  {\bf 12}(10):~2451--2471.
+
+\harvarditem{Hinton \harvardand\ Salakhutdinov}{2006}{hinton}
+Hinton, G.~E. \harvardand\ Salakhutdinov, R.~R.  \harvardyearleft
+  2006\harvardyearright .
+\newblock Reducing the dimensionality of data with neural networks, {\em
+  Science 313.5786} pp.~504--507.
+
+\harvarditem{I.~Goodfellow}{2014}{gans}
+I.~Goodfellow, e.~a.  \harvardyearleft 2014\harvardyearright .
+\newblock Generative adversarial nets, {\em Proc. Adv. Neur. Inf. Process.
+  Sys.} pp.~436--444.
+
+\harvarditem{Kessler}{2015}{tesla}
+Kessler, A.  \harvardyearleft 2015\harvardyearright .
+\newblock Tesla adds high-speed autonomous driving to its bag of tricks, {\em
+  New York Times} .
+
+\harvarditem{Krizhevsky \harvardand\ Hinton}{2012}{cnn}
+Krizhevsky, Alex, I.~S. \harvardand\ Hinton, G.~E.  \harvardyearleft
+  2012\harvardyearright .
+\newblock Tesla adds high-speed autonomous driving to its bag of tricks, {\em
+  Imagenet classification with deep convolutional neural networks}
+  pp.~1097--1105.
+
+\harvarditem{LeCun \harvardand\ Hinton}{2015}{deep}
+LeCun, Yann, Y.~B. \harvardand\ Hinton, G.  \harvardyearleft
+  2015\harvardyearright .
+\newblock Deep learning, {\em Nature} pp.~436--444.
+
+\harvarditem{Ng}{2011}{ng}
+Ng, A.  \harvardyearleft 2011\harvardyearright .
+\newblock Sparse autoencoder, {\em CS294A Lecture notes 72} pp.~1--19.
+
+\harvarditem{Stavens}{2011}{stanford}
+Stavens, David~Michael, e.~a.  \harvardyearleft 2011\harvardyearright .
+\newblock Learning to drive: perception for autonomous cars., {\em Stanford
+  University} .
+
+\harvarditem{Vincent}{2010}{denoise}
+Vincent, Pascal, e.~a.  \harvardyearleft 2010\harvardyearright .
+\newblock Stacked denoising autoencoders: Learning useful representations in a
+  deep network with a local denoising criterion, {\em Journal of Machine
+  Learning Research} pp.~3371--3408.
+
+\harvarditem{Wang \harvardand\ Lukic}{2011}{inteldrive2}
+Wang, R. \harvardand\ Lukic, S.~M.  \harvardyearleft 2011\harvardyearright .
+\newblock Review of driving conditions prediction and driving style recognition
+  based control algorithms for hybrid electric vehicles, {\em IEEE Vehicle
+  Power and Propulsion Conference, Chicago} pp.~1--7.
+
+\end{thebibliography}
